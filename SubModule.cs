@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using TaleWorlds.MountAndBlade;
 using HarmonyLib;
@@ -12,7 +12,7 @@ namespace OrphansAdoption
             base.OnSubModuleLoad();
             try
             {
-                new Harmony("mod.DisableCompanionDonations.bannerlord").PatchAll();
+                new Harmony("BannerLord.Mod.OrphansAdoption").PatchAll();
             }
             catch (Exception ex)
             {
