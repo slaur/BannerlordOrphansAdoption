@@ -187,9 +187,10 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="AdoptOrphanAction.cs" />
+        <Compile Include="AdoptOrphansAction.cs" />
         <Compile Include="OrphansAdoptionPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="RefuseOrphansAction.cs" />
         <Compile Include="SubModule.cs" />
     </ItemGroup>
     <ItemGroup>
