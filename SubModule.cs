@@ -1,23 +1,43 @@
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using TaleWorlds.MountAndBlade;
-using HarmonyLib;
+using TaleWorlds.CampaignSystem;
+using TaleWorlds.Core;
 
 namespace OrphansAdoption
 {
     public class SubModule : MBSubModuleBase
     {
-        protected override void OnSubModuleLoad()
+        private static readonly List<Action> ActionsToExecuteNextTick = new List<Action>();
+        protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
         {
-            base.OnSubModuleLoad();
-            try
+            if (!(game.GameType is Campaign))
             {
-                new Harmony("BannerLord.Mod.OrphansAdoption").PatchAll();
+                return;
             }
-            catch (Exception ex)
+
+            ((CampaignGameStarter)gameStarterObject).AddBehavior(new OrphansAdoptionCampaignBehavior());
+        }
+        
+        public static void ExecuteActionOnNextTick(Action action)
+        {
+            if (action == null)
             {
-                Debug.Print("Error patching:\n" + ex.Message + " \n\n" + ex.InnerException?.Message);
+                return;
             }
+
+            ActionsToExecuteNextTick.Add(action);
+        }
+
+        protected override void OnApplicationTick(float dt)
+        {
+            base.OnApplicationTick(dt);
+            foreach (var action in ActionsToExecuteNextTick)
+            {
+                action();
+            }
+
+            ActionsToExecuteNextTick.Clear();
         }
     }
 }
