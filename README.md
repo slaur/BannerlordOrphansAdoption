@@ -10,5 +10,6 @@ With this mod, these children will be taken to an orphanage and may be adopted.
 They will continue to age and will quit the orphanage on their 18th birthday.
 
 ## Changelog
-### Version 1.7.0
+### Version 1.0.1
  - Get rid of harmony, add a new town menu for orphanage actions
+ - Clans with more than 5 children will not be considered for adoption

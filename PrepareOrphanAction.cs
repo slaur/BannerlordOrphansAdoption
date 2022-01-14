@@ -3,7 +3,7 @@ using TaleWorlds.Localization;
 
 namespace OrphansAdoption
 {
-    public static class ResurrectAction
+    public static class PrepareOrphanAction
     {
         public static void Apply(Hero hero) => MakeAlive(hero);
 

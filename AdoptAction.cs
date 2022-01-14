@@ -37,7 +37,7 @@ namespace OrphansAdoption
 
             if (orphan.IsDead)
             {
-                ResurrectAction.Apply(orphan);
+                PrepareOrphanAction.Apply(orphan);
             }
 
             orphan.Clan = adoptionClan;
