@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using Helpers;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.GameMenus;
@@ -37,7 +40,18 @@ namespace OrphansAdoption
         [GameMenuInitializationHandler("town_orphanage")]
         public static void game_menu_town_orphanage_on_init(MenuCallbackArgs args)
         {
-            args.MenuContext.SetBackgroundMeshName("default_orphanage");
+            Settlement settlement = Settlement.CurrentSettlement;
+            CultureCode[] meshCulturesCodes =
+            {
+                CultureCode.Battania,
+                CultureCode.Empire,
+                CultureCode.Sturgia,
+                CultureCode.Vlandia
+            };
+            var meshName = Array.Exists(meshCulturesCodes, t => t == settlement.Culture.GetCultureCode())
+                ? settlement.Culture.GetCultureCode().ToString().ToLower()
+                : "default";
+            args.MenuContext.SetBackgroundMeshName(meshName + "_orphanage");
         }
 
         private static bool game_menu_town_go_to_orphanage_on_condition(MenuCallbackArgs args)
