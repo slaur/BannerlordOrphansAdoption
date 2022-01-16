@@ -3,30 +3,34 @@ using TaleWorlds.Localization;
 
 namespace OrphansAdoption
 {
-    public static class PrepareOrphanAction
+  public static class PrepareOrphanAction
+  {
+    public static void Apply(Hero hero) => MakeAlive(hero);
+
+    private static void MakeAlive(Hero hero)
     {
-        public static void Apply(Hero hero) => MakeAlive(hero);
+      if (hero.IsAlive) return;
 
-        private static void MakeAlive(Hero hero)
-        {
-            if (hero.IsAlive) return;
-            
-            if ((double) hero.BirthDay.ElapsedYearsUntilNow >= Campaign.Current.Models.AgeModel.HeroComesOfAge) return;
-            var deathAge = (int) hero.Age;
+      var ageAtDeath = (int) hero.Age;
 
-            hero.ChangeState(Hero.CharacterStates.Active);
-            hero.DeathDay = CampaignTime.Never;
-            var currentAge = (int) hero.Age;
+      hero.ChangeState(Hero.CharacterStates.Active);
+      hero.DeathDay = CampaignTime.Never;
+      var currentAge = (int) hero.Age;
 
-            var becomeChildAge = Campaign.Current.Models.AgeModel.BecomeChildAge;
-            var becomeTeenagerAge = Campaign.Current.Models.AgeModel.BecomeTeenagerAge;
-            
-            if (deathAge < becomeChildAge && currentAge > becomeChildAge)
-                CampaignEventDispatcher.Instance.OnHeroGrowsOutOfInfancy(hero);
-            if (deathAge < becomeTeenagerAge && currentAge > becomeTeenagerAge)
-                CampaignEventDispatcher.Instance.OnHeroReachesTeenAge(hero);
-            
-            hero.EncyclopediaText = new TextObject(Hero.SetHeroEncyclopediaTextAndLinks(hero));
-        }
+      if (currentAge >= Campaign.Current.Models.AgeModel.HeroComesOfAge) return;
+
+      var becomeChildAge = Campaign.Current.Models.AgeModel.BecomeChildAge;
+      var becomeTeenagerAge = Campaign.Current.Models.AgeModel.BecomeTeenagerAge;
+      var becomeAdult = Campaign.Current.Models.AgeModel.HeroComesOfAge;
+
+      if (ageAtDeath < becomeChildAge && currentAge > becomeChildAge)
+        CampaignEventDispatcher.Instance.OnHeroGrowsOutOfInfancy(hero);
+      if (ageAtDeath < becomeTeenagerAge && currentAge > becomeTeenagerAge)
+        CampaignEventDispatcher.Instance.OnHeroReachesTeenAge(hero);
+      if (ageAtDeath < becomeAdult && currentAge > becomeAdult)
+        CampaignEventDispatcher.Instance.OnHeroComesOfAge(hero);
+
+      hero.EncyclopediaText = new TextObject(Hero.SetHeroEncyclopediaTextAndLinks(hero));
     }
+  }
 }

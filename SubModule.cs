@@ -4,16 +4,16 @@ using TaleWorlds.Core;
 
 namespace OrphansAdoption
 {
-    public class SubModule : MBSubModuleBase
+  public class SubModule : MBSubModuleBase
+  {
+    protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
     {
-        protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
-        {
-            if (!(game.GameType is Campaign))
-            {
-                return;
-            }
+      if (!(game.GameType is Campaign))
+      {
+        return;
+      }
 
-            ((CampaignGameStarter)gameStarterObject).AddBehavior(new OrphansAdoptionCampaignBehavior());
-        }
+      ((CampaignGameStarter) gameStarterObject).AddBehavior(new OrphansAdoptionCampaignBehavior());
     }
+  }
 }
