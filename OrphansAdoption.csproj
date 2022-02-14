@@ -68,6 +68,7 @@
     <!-- Files & Classes -->
     <ItemGroup>
         <Compile Include="AdoptAction.cs" />
+        <Compile Include="OrphanAdoptionHelper.cs" />
         <Compile Include="OrphansAdoptionCampaignBehavior.cs" />
         <Compile Include="PrepareOrphanAction.cs" />
         <Compile Include="SubModule.cs" />

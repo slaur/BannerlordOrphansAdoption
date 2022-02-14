@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using Helpers;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.GameMenus;
-using TaleWorlds.CampaignSystem.Overlay;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
+using TaleWorlds.Localization;
 
 namespace OrphansAdoption
 {
@@ -27,46 +25,20 @@ namespace OrphansAdoption
     // Menus : see TaleWorlds.CampaignSystem.SandBox.CampaignBehaviors.Towns.PlayerTownVisitCampaignBehavior
     private static void AddGameMenus(CampaignGameStarter campaignGameStarter)
     {
-      campaignGameStarter.AddGameMenuOption("town", "town_orphanage", "Go to the orphanage",
-        game_menu_town_go_to_orphanage_on_condition, x => GameMenu.SwitchToMenu("town_orphanage"), false, 1);
-      campaignGameStarter.AddGameMenu("town_orphanage", "This is the orphanage", town_orphanage_on_init,
-        GameOverlays.MenuOverlayType.SettlementWithBoth);
-      campaignGameStarter.AddGameMenuOption("town_orphanage", "town_orphanage_adopt", "Adopt children",
-        game_menu_orphanage_adopt_on_condition, game_menu_orphanage_adopt_on_consequence);
-      campaignGameStarter.AddGameMenuOption("town_orphanage", "town_orphanage_back", "{=3sRdGQou}Leave",
-        back_on_condition, x => GameMenu.SwitchToMenu("town"), true);
-    }
-
-    [GameMenuInitializationHandler("town_orphanage")]
-    public static void game_menu_town_orphanage_on_init(MenuCallbackArgs args)
-    {
-      Settlement settlement = Settlement.CurrentSettlement;
-      CultureCode[] meshCulturesCodes =
-      {
-        CultureCode.Battania,
-        CultureCode.Empire,
-        CultureCode.Sturgia,
-        CultureCode.Vlandia
-      };
-      var meshName = Array.Exists(meshCulturesCodes, t => t == settlement.Culture.GetCultureCode())
-        ? settlement.Culture.GetCultureCode().ToString().ToLower()
-        : "default";
-      args.MenuContext.SetBackgroundMeshName(meshName + "_orphanage");
-    }
-
-    private static bool game_menu_town_go_to_orphanage_on_condition(MenuCallbackArgs args)
-    {
-      args.optionLeaveType = GameMenuOption.LeaveType.Submenu;
-      return true;
-    }
-
-    private static void town_orphanage_on_init(MenuCallbackArgs args)
-    {
+      campaignGameStarter.AddGameMenuOption("town", "town_orphanage_adopt", "Adopt children",
+        game_menu_orphanage_adopt_on_condition, game_menu_orphanage_adopt_on_consequence, false, 9);
     }
 
     private static bool game_menu_orphanage_adopt_on_condition(MenuCallbackArgs args)
     {
       args.optionLeaveType = GameMenuOption.LeaveType.Recruit;
+      var canAdopt = OrphanAdoptionHelper.ChildrenForAdoptionAtSettlement(Hero.MainHero.CurrentSettlement).Any();
+      // ReSharper disable once InvertIf
+      if (!canAdopt)
+      {
+        args.Tooltip = new TextObject("There is no one here.");
+        args.IsEnabled = false;
+      }
       return true;
     }
 
@@ -75,30 +47,17 @@ namespace OrphansAdoption
       ShowChildrenToAdopt();
     }
 
-    private static bool back_on_condition(MenuCallbackArgs args)
-    {
-      args.optionLeaveType = GameMenuOption.LeaveType.Leave;
-      return true;
-    }
-
     private static void ShowChildrenToAdopt()
     {
       var currentSettlement = Hero.MainHero.CurrentSettlement;
-      var lostChildren = Campaign.Current.DeadOrDisabledHeroes.Where(hero =>
-        hero.IsChild
-        && hero.IsNoble
-        && (hero.DeathMark == KillCharacterAction.KillCharacterActionDetail.Lost ||
-            hero.DeathMark == KillCharacterAction.KillCharacterActionDetail.None)
-        && hero.BornSettlement == currentSettlement
-        && (double) hero.BirthDay.ElapsedYearsUntilNow < Campaign.Current.Models.AgeModel.HeroComesOfAge
-      ).ToList();
+      var lostChildren = OrphanAdoptionHelper.ChildrenForAdoptionAtSettlement(currentSettlement);
 
       var inquiryElements = new List<InquiryElement>();
       foreach (var hero in lostChildren)
       {
         var identifier = new ImageIdentifier(CharacterCode.CreateFrom(hero.CharacterObject));
         inquiryElements.Add(new InquiryElement(hero,
-          hero.Name + " - " + hero.BirthDay.ElapsedYearsUntilNow.ToString("0"),
+          hero.Name + " - " + Math.Floor(hero.BirthDay.ElapsedYearsUntilNow),
           identifier));
       }
 
@@ -108,7 +67,7 @@ namespace OrphansAdoption
           new InquiryData("No child",
             "Empty orphanage", true, false, "OK", "", null, null),
           true);
-        GameMenu.SwitchToMenu("town_orphanage");
+        GameMenu.SwitchToMenu("town");
       }
       else
       {
@@ -126,7 +85,7 @@ namespace OrphansAdoption
     private static void ConfirmAdoption(Hero child)
     {
       AdoptAction.ApplyByChoice(child, Clan.PlayerClan);
-      GameMenu.SwitchToMenu("town_orphanage");
+      GameMenu.SwitchToMenu("town");
     }
 
     private static void OnBeforeHeroKilled(Hero victim, Hero killer,

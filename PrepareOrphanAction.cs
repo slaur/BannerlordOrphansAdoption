@@ -7,6 +7,7 @@ namespace OrphansAdoption
   {
     public static void Apply(Hero hero) => MakeAlive(hero);
 
+    // Revert TaleWorlds.CampaignSystem.Actions.KillCharacterAction.MakeDead
     private static void MakeAlive(Hero hero)
     {
       if (hero.IsAlive) return;
